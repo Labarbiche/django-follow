@@ -1,5 +1,9 @@
 from django import template
-from django.core.urlresolvers import reverse
+from django import VERSION as DjangoVersion
+if float('%s.%s' % DjangoVersion[:2]) >= 2.0:
+    from django.urls import reverse
+else:
+    from django.core.urlresolvers import reverse
 from follow.models import Follow
 from follow import utils
 import re

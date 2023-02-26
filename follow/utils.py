@@ -1,7 +1,18 @@
-from django.core.urlresolvers import reverse
+from django import VERSION as DjangoVersion
+if float('%s.%s' % DjangoVersion[:2]) >= 2.0:
+    from django.urls import reverse
+else:
+    from django.core.urlresolvers import reverse
+
 from django.db.models.fields.related import ManyToManyField, ForeignKey
+from django.db import models
 from follow.models import Follow
 from follow.registry import registry, model_map
+from django import VERSION as DjangoVersion
+if float('%s.%s' % DjangoVersion[:2]) >= 1.7:
+    module_name = 'model_name'
+else:
+    module_name = 'module_name'
 
 def get_followers_for_object(instance):
     return Follow.objects.get_follows(instance)
@@ -17,13 +28,13 @@ def register(model, field_name=None, related_name=None, lookup_method_name='get_
     registry.append(model)
     
     if not field_name:
-        field_name = 'target_%s' % model._meta.module_name
+        field_name = 'target_%s' % model._meta.__getattribute__(module_name)
     
     if not related_name:
-        related_name = 'follow_%s' % model._meta.module_name
+        related_name = 'follow_%s' % model._meta.__getattribute__(module_name)
     
     field = ForeignKey(model, related_name=related_name, null=True,
-        blank=True, db_index=True)
+        blank=True, db_index=True, on_delete=models.CASCADE)
     
     field.contribute_to_class(Follow, field_name)
     setattr(model, lookup_method_name, get_followers_for_object)

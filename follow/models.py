@@ -66,17 +66,17 @@ class Follow(models.Model):
     This model allows a user to follow any kind of object. The followed
     object is accessible through `Follow.target`.
     """
-    user = models.ForeignKey(User, related_name='following')
+    user = models.ForeignKey(User, related_name='following', on_delete=models.CASCADE)
 
     datetime = models.DateTimeField(auto_now_add=True)
 
     objects = FollowManager()
 
-    def __unicode__(self):
-        return u'%s' % self.target
+    def __str__(self):
+        return u'%s: %s: %s' % (self.user.username, self.target.__class__.__name__, self.target)
 
     def _get_target(self):
-        for Model, (_, fname) in model_map.iteritems():
+        for Model, (_, fname) in model_map.items():
             try:
                 if hasattr(self, fname) and getattr(self, fname):
                     return getattr(self, fname)
